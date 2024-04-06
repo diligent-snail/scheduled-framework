@@ -3,23 +3,32 @@ package ru.hse.scheduled.client;
 import ru.hse.scheduled.api.Framework;
 import ru.hse.scheduled.api.annotation.Scheduled;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ServiceLoader;
 
 public class Application {
-    /*@Scheduled
+    @Scheduled
     private void sayHello() {
-        // 1. Метод найдем, исключение вылетит, в консоль напечатается
-        // 2. Метод найдем, исключение вылетит, в консоль не напечатается
-        // 3. Метод не найдем
-        System.out.println("Hello!");
-    }*/
+        System.out.println("Hello! Time is " + LocalDateTime.now());
+    }
 
     public static void main(String[] args) {
-        System.out.println(Application.class.getModule());
-        // new SimpleFramework();
-        /*Framework framework = ServiceLoader.load(Framework.class)
-                        .findFirst()
-                                .orElseThrow();
-        framework.start(Application.class);*/
+        try (Framework framework = getFramework()) {
+            framework.start(Application.class);
+            try {
+                Thread.sleep(Duration.ofSeconds(5));
+            } catch (InterruptedException e) {
+                System.out.println("Interrupted during sleep. Message: '" + e.getMessage() + "'");
+                e.printStackTrace(System.out);
+            }
+        }
     }
+
+    private static Framework getFramework() {
+        return ServiceLoader.load(Framework.class)
+                .findFirst()
+                .orElseThrow();
+    }
+
 }

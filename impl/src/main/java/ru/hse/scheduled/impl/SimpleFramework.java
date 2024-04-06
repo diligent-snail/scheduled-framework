@@ -11,9 +11,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class SimpleFramework implements Framework {
-    private final ScheduledExecutorService executorService
-            = Executors.newSingleThreadScheduledExecutor();
-
+    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
 
     @Override
     public void start(Class<?> clazz) {
@@ -21,43 +19,35 @@ public class SimpleFramework implements Framework {
         for (Method method : methods) {
             Scheduled annotation = method.getAnnotation(Scheduled.class);
             if (annotation != null) {
-                Constructor<?> constructor = null;
-                try {
-                    constructor = clazz.getDeclaredConstructor();
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(e);
-                }
-                Object object = newInstance(constructor);
+                Object object = newInstance(clazz);
                 long fixedRate = annotation.fixedRate();
-
-
                 executorService.scheduleAtFixedRate(
-                        new PrintExceptionRunnable(
-                                () -> {
-                                    try {
-                                        method.setAccessible(true);
-                                        method.invoke(object);
-                                    } catch (IllegalAccessException | InvocationTargetException e) {
-                                        throw new RuntimeException(e);
-                                    }
-                                }), 0, fixedRate, TimeUnit.MILLISECONDS);
+                        new PrintExceptionRunnable(() -> invokeMethod(method, object)), 0, fixedRate, TimeUnit.MILLISECONDS);
 
             }
         }
     }
 
-    private static Object newInstance(Constructor<?> constructor) {
-        Object object;
+    private static void invokeMethod(Method method, Object object) {
         try {
-            object = constructor.newInstance();
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+            method.setAccessible(true);
+            method.invoke(object);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
-        return object;
+    }
+
+    private static Object newInstance(Class<?> clazz) {
+        try {
+            Constructor<?> constructor = clazz.getDeclaredConstructor();
+            return constructor.newInstance();
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     @Override
     public void close() {
-
+        executorService.close();
     }
 }
