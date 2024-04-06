@@ -1,6 +1,6 @@
 = Framework с определённым числом запусков
 
-Необходимо написать создать новый фреймворк, который будет запускать link:api/src/main/java/ru/hse/scheduled/api/annotation/Scheduled.java[`@Scheduled`] метод определённое число раз.
+Необходимо написать новый фреймворк, который будет запускать link:api/src/main/java/ru/hse/scheduled/api/annotation/Scheduled.java[`@Scheduled`] метод определённое число раз.
 Количество раз контролируется параметром `times` аннотации `@Scheduled`, например:
 
 [source,java]
