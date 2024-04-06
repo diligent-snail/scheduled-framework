@@ -14,6 +14,10 @@ public interface Framework extends AutoCloseable {
      */
     void start(Class<?> clazz);
 
+    default boolean supports(Feature feature) {
+        return false;
+    }
+
     /**
      * Shuts down the framework
      */
